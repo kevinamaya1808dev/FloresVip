@@ -1,51 +1,87 @@
 ---
-// QuoteForm.astro
+// src/components/QuoteForm.astro
 ---
 <section id="cotizar" class="py-24 px-6 md:px-12 bg-petalo-cream/50">
   <div class="max-w-5xl mx-auto bg-white rounded-petalo shadow-2xl overflow-hidden flex flex-col md:flex-row border border-petalo-moss/10">
     
     <div class="md:w-1/3 bg-petalo-moss p-12 text-white flex flex-col justify-between">
       <div>
-        <h2 class="font-serif text-3xl mb-6">Cotiza tu Evento</h2>
+        <h2 class="font-serif text-3xl mb-6 leading-tight">Cotiza tu Evento</h2>
         <p class="text-white/80 font-light text-sm leading-relaxed mb-8">
           Desde bodas íntimas hasta grandes celebraciones, nuestro equipo diseñará la atmósfera perfecta para ti.
         </p>
       </div>
       <div class="space-y-4 text-xs tracking-widest uppercase font-bold">
-        <p class="flex items-center gap-3"><span class="text-petalo-rose">●</span> Respuesta en 24h</p>
-        <p class="flex items-center gap-3"><span class="text-petalo-rose">●</span> Asesoría personalizada</p>
+        <p class="flex items-center gap-3 text-white/90"><span class="text-petalo-rose">●</span> Respuesta en 24h</p>
+        <p class="flex items-center gap-3 text-white/90"><span class="text-petalo-rose">●</span> Asesoría personalizada</p>
       </div>
     </div>
 
-    <form class="md:w-2/3 p-8 md:p-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <form id="quote-form" class="md:w-2/3 p-8 md:p-12 grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="flex flex-col gap-2">
         <label class="text-[10px] uppercase font-bold text-petalo-dark/50 tracking-widest">Nombre Completo</label>
-        <input type="text" class="border-b border-petalo-moss/20 py-2 focus:border-petalo-rose outline-none transition-colors" placeholder="Tu nombre" />
+        <input type="text" id="q-name" class="border-b border-petalo-moss/20 py-2 focus:border-petalo-rose outline-none transition-colors" placeholder="Tu nombre" required />
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[10px] uppercase font-bold text-petalo-dark/50 tracking-widest">Correo Electrónico</label>
-        <input type="email" class="border-b border-petalo-moss/20 py-2 focus:border-petalo-rose outline-none transition-colors" placeholder="email@ejemplo.com" />
+        <label class="text-[10px] uppercase font-bold text-petalo-dark/50 tracking-widest">Teléfono / WhatsApp</label>
+        <input type="tel" id="q-phone" class="border-b border-petalo-moss/20 py-2 focus:border-petalo-rose outline-none transition-colors" placeholder="55 1234 5678" required />
       </div>
       <div class="flex flex-col gap-2">
         <label class="text-[10px] uppercase font-bold text-petalo-dark/50 tracking-widest">Tipo de Evento</label>
-        <select class="border-b border-petalo-moss/20 py-2 focus:border-petalo-rose outline-none transition-colors bg-transparent">
-          <option>Boda</option>
-          <option>Aniversario</option>
-          <option>Evento Corporativo</option>
-          <option>Otro</option>
+        <select id="q-type" class="border-b border-petalo-moss/20 py-2 focus:border-petalo-rose outline-none transition-colors bg-transparent cursor-pointer">
+          <option value="Boda">Boda</option>
+          <option value="Aniversario">Aniversario</option>
+          <option value="Evento Corporativo">Evento Corporativo</option>
+          <option value="Otro">Otro</option>
         </select>
       </div>
       <div class="flex flex-col gap-2">
         <label class="text-[10px] uppercase font-bold text-petalo-dark/50 tracking-widest">Fecha Estimada</label>
-        <input type="date" class="border-b border-petalo-moss/20 py-2 focus:border-petalo-rose outline-none transition-colors" />
+        <input type="date" id="q-date" class="border-b border-petalo-moss/20 py-2 focus:border-petalo-rose outline-none transition-colors" required />
       </div>
       <div class="md:col-span-2 flex flex-col gap-2 mt-4">
         <label class="text-[10px] uppercase font-bold text-petalo-dark/50 tracking-widest">Detalles del Pedido</label>
-        <textarea rows="3" class="border border-petalo-moss/10 rounded-md p-4 focus:border-petalo-rose outline-none transition-colors" placeholder="Cuéntanos más sobre tus flores ideales..."></textarea>
+        <textarea id="q-message" rows="3" class="border border-petalo-moss/10 rounded-md p-4 focus:border-petalo-rose outline-none transition-colors resize-none" placeholder="Cuéntanos más sobre tus flores ideales..."></textarea>
       </div>
-      <button class="md:col-span-2 bg-petalo-dark text-white py-5 rounded-petalo font-bold uppercase text-xs tracking-[0.2em] hover:bg-petalo-moss transition-all mt-4">
+      
+      <button type="submit" class="md:col-span-2 bg-petalo-dark text-white py-5 rounded-petalo font-bold uppercase text-xs tracking-[0.2em] hover:bg-petalo-moss transition-all mt-4 shadow-lg active:scale-95">
         Enviar Solicitud de Cotización
       </button>
     </form>
   </div>
 </section>
+
+<script>
+  const quoteForm = document.getElementById('quote-form');
+
+  quoteForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    // 1. Capturamos los datos
+    const name = (document.getElementById('q-name') as HTMLInputElement).value;
+    const phone = (document.getElementById('q-phone') as HTMLInputElement).value;
+    const type = (document.getElementById('q-type') as HTMLSelectElement).value;
+    const date = (document.getElementById('q-date') as HTMLInputElement).value;
+    const details = (document.getElementById('q-message') as HTMLTextAreaElement).value;
+
+    // 2. Definimos tu número de WhatsApp con código de país
+    const whatsappNumber = "525633630467";
+
+    // 3. Estructuramos el mensaje con negritas para que sea legible
+    const message = `✨ *NUEVA COTIZACIÓN PARA EVENTO* ✨\n\n` +
+                    `*Cliente:* ${name}\n` +
+                    `*Teléfono:* ${phone}\n` +
+                    `*Evento:* ${type}\n` +
+                    `*Fecha:* ${date}\n\n` +
+                    `--- 📝 *DETALLES* ---\n` +
+                    `${details || 'Sin detalles adicionales'}\n\n` +
+                    `_Enviado desde el sitio web Pétalo_`;
+
+    // 4. Codificamos el mensaje para la URL
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+    // 5. Abrimos WhatsApp en una nueva pestaña
+    window.open(whatsappUrl, '_blank');
+  });
+</script>

@@ -4,31 +4,33 @@
 <div id="modal-overlay" class="fixed inset-0 bg-petalo-dark/60 backdrop-blur-md z-[100] hidden items-center justify-center p-6">
   <div class="bg-white w-full max-w-lg rounded-petalo shadow-2xl overflow-hidden animate-fade-up">
     <div class="p-8 border-b border-petalo-cream flex justify-between items-center">
-      <h2 class="font-serif text-2xl">Datos de Entrega</h2>
-      <button id="close-modal" class="text-petalo-dark/40 hover:text-petalo-dark">✕</button>
+      <h2 class="font-serif text-2xl text-petalo-dark">Datos de Entrega</h2>
+      <button id="close-modal" class="text-petalo-dark/40 hover:text-petalo-dark transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     
-    <form class="p-8 space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1">
-          <label class="text-[10px] font-bold uppercase tracking-widest text-petalo-moss">Nombre</label>
-          <input type="text" class="border-b border-petalo-moss/20 py-2 outline-none focus:border-petalo-rose" placeholder="¿Quién recibe?" required />
+    <form id="checkout-form" class="p-8 space-y-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold uppercase tracking-widest text-petalo-moss">Nombre del Cliente</label>
+          <input type="text" id="cust-name" class="border-b border-petalo-moss/20 py-2 outline-none focus:border-petalo-rose transition-colors" placeholder="Ej. Juan Pérez" required />
         </div>
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1.5">
           <label class="text-[10px] font-bold uppercase tracking-widest text-petalo-moss">Teléfono</label>
-          <input type="tel" class="border-b border-petalo-moss/20 py-2 outline-none focus:border-petalo-rose" placeholder="10 dígitos" required />
+          <input type="tel" id="cust-phone" class="border-b border-petalo-moss/20 py-2 outline-none focus:border-petalo-rose transition-colors" placeholder="55 1234 5678" required />
         </div>
       </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-[10px] font-bold uppercase tracking-widest text-petalo-moss">Dirección Completa</label>
-        <input type="text" class="border-b border-petalo-moss/20 py-2 outline-none focus:border-petalo-rose" placeholder="Calle, número y colonia" required />
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold uppercase tracking-widest text-petalo-moss">Dirección de Entrega</label>
+        <input type="text" id="cust-address" class="border-b border-petalo-moss/20 py-2 outline-none focus:border-petalo-rose transition-colors" placeholder="Calle, número, colonia y CP" required />
       </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-[10px] font-bold uppercase tracking-widest text-petalo-moss">Nota Especial (Opcional)</label>
-        <textarea rows="2" class="border border-petalo-moss/10 rounded-md p-3 text-sm outline-none focus:border-petalo-rose" placeholder="Escribe un mensaje para la tarjeta..."></textarea>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold uppercase tracking-widest text-petalo-moss">Dedicatoria / Nota Especial</label>
+        <textarea id="cust-note" rows="2" class="border border-petalo-moss/10 rounded-md p-3 text-sm outline-none focus:border-petalo-rose transition-colors" placeholder="Escribe el mensaje para la tarjeta..."></textarea>
       </div>
       
-      <button type="submit" class="w-full bg-petalo-dark text-white py-4 rounded-petalo font-bold uppercase text-xs tracking-[0.2em] hover:bg-petalo-moss transition-all mt-4">
+      <button type="submit" class="w-full bg-petalo-dark text-white py-4 rounded-petalo font-bold uppercase text-xs tracking-[0.2em] hover:bg-petalo-moss transition-all shadow-lg active:scale-95 mt-4">
         CONFIRMAR Y ENVIAR POR WHATSAPP
       </button>
     </form>
@@ -36,11 +38,13 @@
 </div>
 
 <script>
-  import { isModalOpen } from '../store/cartStore.js';
+  import { isModalOpen, cartItems } from '../store/cartStore.js';
 
   const modal = document.getElementById('modal-overlay');
   const closeBtn = document.getElementById('close-modal');
+  const checkoutForm = document.getElementById('checkout-form');
 
+  // Control de visibilidad del modal
   isModalOpen.subscribe(open => {
     if (open) {
       modal?.classList.remove('hidden');
@@ -52,7 +56,61 @@
   });
 
   closeBtn?.addEventListener('click', () => isModalOpen.set(false));
+
+  // --- LÓGICA DE ENVÍO A WHATSAPP ---
+  checkoutForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    // 1. Obtener datos del formulario
+    const name = (document.getElementById('cust-name') as HTMLInputElement).value;
+    const phone = (document.getElementById('cust-phone') as HTMLInputElement).value;
+    const address = (document.getElementById('cust-address') as HTMLInputElement).value;
+    const note = (document.getElementById('cust-note') as HTMLTextAreaElement).value;
+
+    // 2. Obtener productos del carrito
+    const items = cartItems.get();
+    const total = items.reduce((acc: number, item: any) => acc + (parseFloat(item.price.replace(',', '')) * item.quantity), 0);
+
+    // 3. Formatear la lista de productos para el mensaje
+    const itemsList = items.map((item: any) => 
+      `• ${item.name} (x${item.quantity}) - $${item.price}`
+    ).join('\n');
+
+    // 4. Crear el mensaje estructurado
+    const whatsappNumber = "525633630467"; // Código de país + número
+    const message = `🌸 *NUEVO PEDIDO - PÉTALO* 🌸\n\n` +
+                    `*Detalles del pedido:*\n${itemsList}\n\n` +
+                    `*Total:* $${total.toLocaleString()}\n\n` +
+                    `--- 🚚 *DATOS DE ENTREGA* ---\n` +
+                    `*Nombre:* ${name}\n` +
+                    `*Teléfono:* ${phone}\n` +
+                    `*Dirección:* ${address}\n` +
+                    `*Nota:* ${note || 'Sin nota'}\n\n` +
+                    `_Enviado desde la plataforma Pétalo_`;
+
+    // 5. Codificar el mensaje para URL
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+    // 6. Abrir WhatsApp y resetear estado
+    window.open(whatsappUrl, '_blank');
+    isModalOpen.set(false);
+    // Opcional: Vaciar carrito después de comprar
+    // cartItems.set([]); 
+  });
+
+  // Cerrar al hacer clic fuera
   modal?.addEventListener('click', (e) => {
     if (e.target === modal) isModalOpen.set(false);
   });
 </script>
+
+<style>
+  .animate-fade-up {
+    animation: fadeUp 0.4s ease-out forwards;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
