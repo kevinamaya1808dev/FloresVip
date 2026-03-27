@@ -1,0 +1,77 @@
+---
+// src/components/ui/ProductCard.astro
+// Definimos las propiedades que recibe la tarjeta
+interface Props {
+  image: string;
+  category: string;
+  name: string;
+  description: string;
+  price: string;
+}
+
+const { image, category, name, description, price } = Astro.props;
+---
+
+<div class="flex flex-col bg-white rounded-petalo border border-petalo-cream border-opacity-50 shadow-sm overflow-hidden group transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
+  
+  <div class="relative overflow-hidden aspect-[4/3] bg-petalo-cream/30">
+    <img 
+      src={image} 
+      alt={name} 
+      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+      loading="lazy"
+    />
+    <span class="absolute top-3 left-3 bg-white/80 backdrop-blur-sm text-petalo-moss text-[10px] font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full z-10">
+      {category}
+    </span>
+  </div>
+
+  <div class="p-6 flex flex-col flex-grow">
+    
+    <div class="flex justify-between items-start gap-3 mb-2.5">
+      <h3 class="font-serif text-2xl text-petalo-dark leading-tight flex-1 pr-1">
+        {name}
+      </h3>
+      <p class="font-sans text-xl font-bold text-petalo-dark whitespace-nowrap pt-1">
+        ${price}
+      </p>
+    </div>
+    
+    <p class="text-petalo-dark/60 text-sm font-light leading-relaxed mb-6 line-clamp-3">
+      {description}
+    </p>
+
+    <button 
+      class="add-to-cart-btn mt-auto w-full flex items-center justify-center gap-2 
+             border border-petalo-rose text-petalo-rose 
+             hover:bg-petalo-rose hover:text-white 
+             px-5 py-2.5 rounded-petalo 
+             text-[11px] font-bold uppercase tracking-[0.15em] 
+             transition-all duration-300 active:scale-[0.98] shadow-sm"
+      data-name={name}
+      data-price={price}
+      data-image={image}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+      <span>AGREGAR AL CARRITO</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  import { addCartItem } from '../../store/cartStore.js';
+
+  const buttons = document.querySelectorAll('.add-to-cart-btn');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const name = btn.getAttribute('data-name');
+      const price = btn.getAttribute('data-price');
+      const image = btn.getAttribute('data-image');
+      
+      if (name && price && image) {
+        addCartItem({ name, price, image });
+      }
+    });
+  });
+</script>

@@ -1,0 +1,58 @@
+---
+// src/components/CheckoutModal.astro
+---
+<div id="modal-overlay" class="fixed inset-0 bg-petalo-dark/60 backdrop-blur-md z-[100] hidden items-center justify-center p-6">
+  <div class="bg-white w-full max-w-lg rounded-petalo shadow-2xl overflow-hidden animate-fade-up">
+    <div class="p-8 border-b border-petalo-cream flex justify-between items-center">
+      <h2 class="font-serif text-2xl">Datos de Entrega</h2>
+      <button id="close-modal" class="text-petalo-dark/40 hover:text-petalo-dark">✕</button>
+    </div>
+    
+    <form class="p-8 space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-[10px] font-bold uppercase tracking-widest text-petalo-moss">Nombre</label>
+          <input type="text" class="border-b border-petalo-moss/20 py-2 outline-none focus:border-petalo-rose" placeholder="¿Quién recibe?" required />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-[10px] font-bold uppercase tracking-widest text-petalo-moss">Teléfono</label>
+          <input type="tel" class="border-b border-petalo-moss/20 py-2 outline-none focus:border-petalo-rose" placeholder="10 dígitos" required />
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-[10px] font-bold uppercase tracking-widest text-petalo-moss">Dirección Completa</label>
+        <input type="text" class="border-b border-petalo-moss/20 py-2 outline-none focus:border-petalo-rose" placeholder="Calle, número y colonia" required />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-[10px] font-bold uppercase tracking-widest text-petalo-moss">Nota Especial (Opcional)</label>
+        <textarea rows="2" class="border border-petalo-moss/10 rounded-md p-3 text-sm outline-none focus:border-petalo-rose" placeholder="Escribe un mensaje para la tarjeta..."></textarea>
+      </div>
+      
+      <button type="submit" class="w-full bg-petalo-dark text-white py-4 rounded-petalo font-bold uppercase text-xs tracking-[0.2em] hover:bg-petalo-moss transition-all mt-4">
+        CONFIRMAR Y ENVIAR POR WHATSAPP
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  import { isModalOpen } from '../store/cartStore.js';
+
+  const modal = document.getElementById('modal-overlay');
+  const closeBtn = document.getElementById('close-modal');
+
+  isModalOpen.subscribe(open => {
+    if (open) {
+      modal?.classList.remove('hidden');
+      modal?.classList.add('flex');
+    } else {
+      modal?.classList.add('hidden');
+      modal?.classList.remove('flex');
+    }
+  });
+
+  closeBtn?.addEventListener('click', () => isModalOpen.set(false));
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) isModalOpen.set(false);
+  });
+</script>

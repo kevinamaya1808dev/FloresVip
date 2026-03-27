@@ -1,0 +1,57 @@
+---
+// Header.astro
+---
+<header id="main-header" class="fixed w-full z-50 transition-all duration-500 py-6 px-6 md:px-12">
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <div class="flex items-center gap-3 group cursor-pointer">
+      <div class="w-10 h-10 bg-petalo-moss rounded-full flex items-center justify-center transition-transform group-hover:rotate-12">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 10 2 2m0-2-2 2"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+      </div>
+      <span class="font-serif text-2xl font-bold tracking-tight text-petalo-dark">Pétalo</span>
+    </div>
+
+    <nav class="hidden md:flex items-center gap-10 text-xs font-bold uppercase tracking-widest text-petalo-dark/70">
+      <a href="#inicio" class="hover:text-petalo-moss transition-colors">Inicio</a>
+      <a href="#catalogo" class="hover:text-petalo-moss transition-colors">Catálogo</a>
+      <a href="#ocasiones" class="hover:text-petalo-moss transition-colors">Ocasiones</a>
+      <a href="#servicios" class="hover:text-petalo-moss transition-colors">Servicios</a>
+      <a href="#cotizar" class="hover:text-petalo-moss transition-colors">Cotizar</a>
+    </nav>
+
+    <div class="flex items-center gap-5">
+      <button id="open-cart" class="relative p-2 text-petalo-dark hover:text-petalo-moss transition-all group">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="header-cart-badge absolute -top-1 -right-1 bg-petalo-rose text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white group-hover:scale-110 transition-transform">0</span>
+      </button>
+      <a href="#cotizar" class="hidden lg:block bg-petalo-rose text-white px-8 py-3 rounded-petalo text-xs font-bold uppercase tracking-widest hover:bg-petalo-moss transition-all shadow-md active:scale-95">
+        Cotizar Evento
+      </a>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Los imports siempre al inicio del script
+  import { cartItems } from '../store/cartStore.js';
+
+  const header = document.getElementById('main-header');
+  const badge = document.querySelector('.header-cart-badge');
+
+  // Lógica del scroll corregida
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+      header?.classList.add('bg-white/90', 'backdrop-blur-xl', 'shadow-sm', 'py-4');
+      header?.classList.remove('py-6');
+    } else {
+      header?.classList.remove('bg-white/90', 'backdrop-blur-xl', 'shadow-sm', 'py-4');
+      header?.classList.add('py-6');
+    }
+  });
+
+  // Suscripción al carrito para actualizar el badge
+  cartItems.subscribe((items: any) => {
+    if (badge) {
+      badge.textContent = items.length.toString();
+    }
+  });
+</script>

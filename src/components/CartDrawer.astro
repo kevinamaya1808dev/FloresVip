@@ -1,0 +1,117 @@
+---
+// src/components/CartDrawer.astro
+---
+<div id="cart-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] opacity-0 pointer-events-none transition-opacity duration-500"></div>
+
+<aside id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[70] translate-x-full transition-transform duration-500 ease-in-out shadow-2xl flex flex-col">
+  <div class="p-8 border-b border-petalo-cream flex justify-between items-center">
+    <h2 class="font-serif text-2xl text-petalo-dark font-bold">Tu Selección</h2>
+    <button id="close-cart" class="p-2 hover:rotate-90 transition-transform duration-300">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div id="cart-items-container" class="flex-1 overflow-y-auto p-8 space-y-6">
+    </div>
+
+  <div class="p-8 bg-petalo-cream/30 border-t border-petalo-cream">
+    <div class="flex justify-between items-center mb-6">
+      <span class="text-xs font-bold uppercase tracking-widest text-petalo-dark/50">Total</span>
+      <span id="cart-total" class="text-2xl font-bold text-petalo-dark font-serif">$0</span>
+    </div>
+    <button id="checkout-btn" class="w-full bg-petalo-rose text-white py-5 rounded-petalo font-bold uppercase text-xs tracking-[0.2em] shadow-lg hover:bg-petalo-moss transition-all">
+      ENVIAR PEDIDO
+    </button>
+  </div>
+</aside>
+
+<script>
+  import { cartItems, isCartOpen, addCartItem, decreaseQuantity, removeFromCart, isModalOpen } from '../store/cartStore.js';
+
+  const container = document.getElementById('cart-items-container');
+  const drawer = document.getElementById('cart-drawer');
+  const overlay = document.getElementById('cart-overlay');
+  const totalDisplay = document.getElementById('cart-total');
+
+  // Renderizar Carrito
+  cartItems.subscribe((items: any) => {
+    if (!container) return;
+    
+    if (items.length === 0) {
+      container.innerHTML = `<p class="text-center text-petalo-dark/30 italic py-20">No has añadido flores aún.</p>`;
+      if (totalDisplay) totalDisplay.textContent = "$0";
+      return;
+    }
+
+    const total = items.reduce((acc: number, item: any) => acc + (parseFloat(item.price.replace(',', '')) * item.quantity), 0);
+    if (totalDisplay) totalDisplay.textContent = `$${total.toLocaleString()}`;
+
+    container.innerHTML = items.map((item: any) => `
+      <div class="flex gap-4 group animate-fade-in">
+        <img src="${item.image}" class="w-20 h-24 object-cover rounded-md shadow-sm" />
+        <div class="flex-1 flex flex-col justify-between py-1">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-serif text-lg text-petalo-dark">${item.name}</h4>
+              <p class="text-xs text-petalo-moss font-bold">$${item.price}</p>
+            </div>
+            <button class="delete-item p-1 text-petalo-dark/20 hover:text-red-400 transition-colors" data-name="${item.name}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </button>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <div class="flex items-center border border-petalo-moss/20 rounded-full px-2 py-1">
+              <button class="minus-btn p-1 hover:text-petalo-rose" data-name="${item.name}">-</button>
+              <span class="text-sm font-bold w-8 text-center">${item.quantity}</span>
+              <button class="plus-btn p-1 hover:text-petalo-rose" data-name="${item.name}">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Eventos de botones (Delegación de eventos)
+    container.querySelectorAll('.plus-btn').forEach(btn => 
+      btn.addEventListener('click', () => {
+        const name = btn.getAttribute('data-name');
+        const item = items.find((i: any) => i.name === name);
+        addCartItem(item);
+      })
+    );
+
+    container.querySelectorAll('.minus-btn').forEach(btn => 
+      btn.addEventListener('click', () => decreaseQuantity(btn.getAttribute('data-name') || ''))
+    );
+
+    container.querySelectorAll('.delete-item').forEach(btn => 
+      btn.addEventListener('click', () => removeFromCart(btn.getAttribute('data-name') || ''))
+    );
+  });
+
+  // Control de apertura/cierre
+  const toggleCart = (open: boolean) => {
+    isCartOpen.set(open);
+    drawer?.classList.toggle('translate-x-full', !open);
+    overlay?.classList.toggle('opacity-0', !open);
+    overlay?.classList.toggle('pointer-events-none', !open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+
+  document.getElementById('open-cart')?.addEventListener('click', () => toggleCart(true));
+  document.getElementById('close-cart')?.addEventListener('click', () => toggleCart(false));
+  overlay?.addEventListener('click', () => toggleCart(false));
+
+  // Abrir Modal de Pedido
+  document.getElementById('checkout-btn')?.addEventListener('click', () => {
+    isModalOpen.set(true);
+    toggleCart(false);
+  });
+
+  isCartOpen.subscribe(open => {
+    if (open) {
+      drawer?.classList.remove('translate-x-full');
+      overlay?.classList.remove('opacity-0', 'pointer-events-none');
+    }
+  });
+</script>
